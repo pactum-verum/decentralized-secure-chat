@@ -1,6 +1,6 @@
-# Messaging
+# Decentralized Secure Messaging
 
-Libp2p style messaging, group management in IPFS-defined groups, encryption of messages.
+Libp2p style messaging, but for multiple parties chatting, group management in IPFS-defined groups, encryption and signing of messages.
 
 ## Requirements
 
