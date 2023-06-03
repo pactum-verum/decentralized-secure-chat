@@ -10,6 +10,14 @@ const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
   const [groupCid, setGroupCid] = React.useState(null);
   const [ecdh, setEcdh] = React.useState(null);
+  const [address, setAddress] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!signer) return;
+    (async () => {
+      setAddress(await signer.getAddress());
+    }) ();
+  }, [signer]);
 
   // Replace these with your actual data from the backend
   const groupName = 'Our Group';
@@ -38,7 +46,7 @@ console.log("ecdh", ecdh);
       <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} setEcdh={setEcdh} />
       {ecdh?
       (!groupCid?
-      <GroupSelect signer={signer} setGroupCid={setGroupCid} />
+      <GroupSelect ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroupCid={setGroupCid} />
       :
       <Grid width='100%'>
           <GridItem rowStart={1} colSpan={1}  bg='black'>
