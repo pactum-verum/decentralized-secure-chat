@@ -1,15 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import * as IPFS from 'ipfs-http-client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+try {
+  // const ipfs = ipfs({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+  const ipfs = await IPFS.create("http://localhost:5001");
+
+  root.render(
+    <React.StrictMode>
+      <App ipfs={ipfs} />
+    </React.StrictMode>
+  );
+} catch (error) {
+  console.error(error);
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
