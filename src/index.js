@@ -4,6 +4,7 @@ import * as IPFS from 'ipfs-http-client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { ChakraProvider } from '@chakra-ui/react';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 try {
@@ -12,7 +13,9 @@ try {
 
   root.render(
     <React.StrictMode>
-      <App ipfs={ipfs} />
+      <ChakraProvider>
+        <App ipfs={ipfs} />
+      </ChakraProvider>
     </React.StrictMode>
   );
 } catch (error) {
