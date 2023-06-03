@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { Flex, HStack, Button, Text, Box } from '@chakra-ui/react'
 import { CloseIcon } from '@chakra-ui/icons'
+import seedToEcdh from '../utils/seedToECDH';
 
-function Titlebar({setSigner, groupName, groupCid, setGroupCid}) {
+function Titlebar({setSigner, groupName, groupCid, setGroupCid, setEcdh}) {
   const [address, setAddress] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -34,11 +35,29 @@ function Titlebar({setSigner, groupName, groupCid, setGroupCid}) {
       setSigner(signer);
       const connectedAddress = await signer.getAddress();
 
+      regenerateEcdh(signer);
+
       setAddress(connectedAddress);
       setIsConnected(true);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const regenerateEcdh = async (signer) => {
+    const signature = await signer.signMessage("Sign this to re-generate encryption keys!");
+
+    // Test wallet  RFC 6979 compliance!
+    const signatureAgain = await signer.signMessage("Sign this to re-generate encryption keys!");
+    if (signature !== signatureAgain) {
+        window.alert("Your wallet is not RFC 6979 compliant.\nIt cannot be used with this application!");
+        console.log("Non-compliant wallet.");
+        return;
+    }
+
+    const seed = ethers.keccak256(signature);
+
+    setEcdh(seedToEcdh(seed));
   };
 
   const handleDisconnect = () => {
@@ -50,6 +69,7 @@ function Titlebar({setSigner, groupName, groupCid, setGroupCid}) {
   const handleAccountsChanged = (accounts) => {
     if (accounts.length === 0) {
       handleDisconnect();
+      setEcdh(null);
     } else {
       setAddress(accounts[0]);
       setIsConnected(true);

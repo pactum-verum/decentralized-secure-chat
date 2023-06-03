@@ -9,6 +9,7 @@ import GroupSelect from './components/GroupSelect';
 const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
   const [groupCid, setGroupCid] = React.useState(null);
+  const [ecdh, setEcdh] = React.useState(null);
 
   // Replace these with your actual data from the backend
   const groupName = 'Our Group';
@@ -32,9 +33,11 @@ const App = ({ipfs}) => {
     },
   ];
 
+console.log("ecdh", ecdh);
   return (<Box bg='black' w='100%' h='100%' p={4} color='white'>
-      <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} />
-      {!groupCid?
+      <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} setEcdh={setEcdh} />
+      {ecdh?
+      (!groupCid?
       <GroupSelect signer={signer} setGroupCid={setGroupCid} />
       :
       <Grid width='100%'>
@@ -44,7 +47,7 @@ const App = ({ipfs}) => {
           <GridItem rowStart={1} colSpan={19}  bg='black'>
               <ChatArea messages={messages} ipfs={ipfs} />
           </GridItem>
-      </Grid>}
+      </Grid>):''}
   </Box>);
 };
 
