@@ -4,9 +4,11 @@ import { Box, Grid, GridItem } from '@chakra-ui/react'
 import Titlebar from './components/Titlebar';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
+import GroupSelect from './components/GroupSelect';
 
 const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
+  const [groupCid, setGroupCid] = React.useState(null);
 
   // Replace these with your actual data from the backend
   const groupName = 'Our Group';
@@ -31,7 +33,10 @@ const App = ({ipfs}) => {
   ];
 
   return (<Box bg='black' w='100%' h='100%' p={4} color='white'>
-      <Titlebar setSigner={setSigner} groupName={groupName} />
+      <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} />
+      {!groupCid?
+      <GroupSelect signer={signer} setGroupCid={setGroupCid} />
+      :
       <Grid width='100%'>
           <GridItem rowStart={1} colSpan={1}  bg='black'>
               <Sidebar users={users} ipfs={ipfs} />
@@ -39,7 +44,7 @@ const App = ({ipfs}) => {
           <GridItem rowStart={1} colSpan={19}  bg='black'>
               <ChatArea messages={messages} ipfs={ipfs} />
           </GridItem>
-      </Grid>
+      </Grid>}
   </Box>);
 };
 
