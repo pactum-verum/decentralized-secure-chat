@@ -35,14 +35,16 @@ export default async function createEmptyTree(groupName, myName, ipfs, address, 
         users: users, 
         content: CID.parse(emptyFolder),
     }
+console.log("emptyTree", emptyTree)
     const cid = await ipfs.dag.put(emptyTree);
-
+console.log("cid", cid.toString())
     const signedTree = {
         root: emptyTree,
-        signature: signer.signMessage(cid.toString())
+        signature: await signer.signMessage(cid.toString())
     }
+console.log("signedTree", signedTree)
     const scid = await ipfs.dag.put(signedTree);
-
+console.log("scid", scid)
 
     // No pinning planned, but this is the place to pin the rootCid
 
