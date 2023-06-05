@@ -75,11 +75,11 @@ The membership database of the chat group is an enumerable mapping of user IDs (
 - User's ECC public key.
 - Encrypted public key structure in the following format:
     - Introducing user's public key. This is the ECC public key of the user that processed the request to add the current user to the chat group. For the user that created the chat group, this is the ECC public key of a temporarily generated throwaway key pair.
-    - Encrypted Common Key using symmetric encryption. The key for the symmetric encryption is the ECDH shared secret between the current user and the introducing user. To recover the shared secret, the current user can use his private ket and the above introducing user's public key.
+    - Encrypted Common Key using symmetric encryption. The key for the symmetric encryption is the ECDH shared secret between the current user and the introducing user. To recover the shared secret, the current user can use his private key and the above introducing user's public key.
 
 To add a new user,
-1. The IPNS name (same as the topic) of the chat group and along with the public key of the new user are packaged into a request.
-2. The request is sent to an existing user, which creates the above structure and adds it to the iterable map of users for the chat.
+1. The alias, address and the public key of the new user are packaged into a request.
+2. The request is sent to an existing user via a separate communication channel (not part of this protocol), which creates the new user's record and adds it to the iterable map of users for the chat.
 3. The existing user, after verifying the request, stores the new iterable map of users into the new membership database.
 4. The existing user publishes to the IPFS pubsub topic the root CID of the updated and signed chat group storage.
 5. The existing user updates the IPLD mapping to the new root CID of the signed chat group storage.

@@ -4,7 +4,7 @@ import { Box, Grid, GridItem } from '@chakra-ui/react'
 import Titlebar from './components/Titlebar';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
-import GroupSelect from './components/GroupSelect';
+import Select from './components/Select';
 
 const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
@@ -46,7 +46,7 @@ console.log("ecdh", ecdh);
       <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} setEcdh={setEcdh} />
       {ecdh?
       (!groupCid?
-      <GroupSelect ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroupCid={setGroupCid} />
+      <Select ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroupCid={setGroupCid} />
       :
       <Grid width='100%'>
           <GridItem rowStart={1} colSpan={1}  bg='black'>
