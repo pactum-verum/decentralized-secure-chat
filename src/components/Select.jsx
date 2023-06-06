@@ -1,20 +1,15 @@
 import React from 'react';
 import { Box, Text, FormLabel, Input, Button, useClipboard } from '@chakra-ui/react'
-import createEmptyTree from '../utils/createEmptyTree';
+import createEmptyGroup from '../utils/createEmptyGroup';
 
-const Select = ({ ipfs, address, signer, ecdh, setGroupCid }) => {
-  const [cid, setCid] = React.useState(null);
+const Select = ({ ipfs, address, signer, ecdh, setGroup }) => {
   const [groupName, setGroupName] = React.useState('');
   const [myName, setMyName] = React.useState('');
   const membershipRequest = useClipboard('');
 
-  React.useEffect(() => {
-    createRequest(myName);
-  }, []);
-
   const createGroup = async () => {
-    const scid = await createEmptyTree(groupName, myName, ipfs, address, ecdh, signer);
-    setGroupCid(scid); // Change this to unsigned cid; when do we need to sign the CIDs?
+console.log("Creating group: ", groupName, myName)
+    setGroupName(await createEmptyGroup(groupName, myName, ipfs, address, ecdh))
   }
 
   const createRequest = (name) => {
@@ -24,13 +19,17 @@ const Select = ({ ipfs, address, signer, ecdh, setGroupCid }) => {
     membershipRequest.setValue(JSON.stringify(request));
   }
 
+  React.useEffect(() => {
+    createRequest(myName);
+  }, [myName, createRequest]);
+
   if (!address) return <></>;
   return (
     <Box width='80%' align='center' p={2} >
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
-            <FormLabel>Group CID</FormLabel>
-            <Input placeholder='CID' onChange={event => setCid(event.target.value)} />
-            <Button onClick={() => setGroupCid(cid)} >Open</Button>
+            <FormLabel>Group Name</FormLabel>
+            <Input placeholder='CID' onChange={event => setGroupName(event.target.value)} />
+            <Button onClick={() => setGroup(groupName)} >Open</Button>
         </Box>
         <Text>or</Text>
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>

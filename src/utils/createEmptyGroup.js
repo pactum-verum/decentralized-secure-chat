@@ -2,27 +2,23 @@
 import crypto from 'crypto';
 import { CID } from 'multiformats/cid';
 import emptyFolder from './emptyFolder';
+import publishToIpns from './publishToIpns';
 
-export default async function createEmptyTree(groupName, myName, ipfs, address, ecdh, signer) {
+export default async function createEmptyGroup(groupName, myName, ipfs, address, ecdh) {
+console.log("Creating...")
     // Create dummy ECDH
     const dummyECDH = crypto.createECDH('secp256k1');
     dummyECDH.generateKeys();
+console.log("dummyECDH", dummyECDH)
 
     const keyEncryprionKey = ecdh.computeSecret(dummyECDH.getPublicKey());
     // Generate Common Secret for symmetric encryption of the content
     const commonSecret = crypto.randomBytes(32);
+console.log('cs', commonSecret)
     const cipher = 'aes-256-ctr';
     const crypter = crypto.createCipher(cipher, keyEncryprionKey);
     let encCommonKey = Buffer.concat([crypter.update(commonSecret), crypter.final()]);
-
-    const ipnsPkey = crypto.randomBytes(32);
-    const ipnsCrypter = crypto.createCipher(cipher, keyEncryprionKey);
-    const encryptedIPNSpkey = Buffer.concat([ipnsCrypter.update(ipnsPkey), ipnsCrypter.final()]);
-
-    const group = {
-        name: groupName,
-        encryptedIPNSpkey: encryptedIPNSpkey.toString('hex')
-    };
+console.log("encCK", encCommonKey)
 
     let users = {};
     users[address] = { 
@@ -30,23 +26,24 @@ export default async function createEmptyTree(groupName, myName, ipfs, address, 
         key: { peer_pubkey: dummyECDH.getPublicKey().toString('hex'), enc_common_key: encCommonKey.toString('hex') }
     }
 
-    const emptyTree = {
-        group: group,
+    const emptyGroup = {
+        name: groupName,
         users: users, 
         content: CID.parse(emptyFolder),
     }
-console.log("emptyTree", emptyTree)
-    const cid = await ipfs.dag.put(emptyTree);
+console.log("et", emptyGroup);
+    const cid = await ipfs.dag.put(emptyGroup);
 console.log("cid", cid.toString())
-    const signedTree = {
-        root: emptyTree,
-        signature: await signer.signMessage(cid.toString())
-    }
-console.log("signedTree", signedTree)
-    const scid = await ipfs.dag.put(signedTree);
-console.log("scid", scid)
 
-    // No pinning planned, but this is the place to pin the rootCid
+    // Non need to sign - the creator trusts himself
+    // const signedTree = {
+    //     root: emptyTree,
+    //     signature: await signer.signMessage(cid.toString())
+    // }
+    // const scid = await ipfs.dag.put(signedTree);
 
-    return scid.toString();
+    // No need to notify anyone, as there is only one user now
+
+    // Publish new cid to IPNS
+    return publishToIpns(cid.toString(), commonSecret, ipfs);
 }

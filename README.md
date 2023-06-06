@@ -96,7 +96,7 @@ Each message updates the Chat Group Storage as follows:
 of the list of message history.
 2. The resulting new Chat Group Storage is signed by the message issuer and broadcast in the chat
 group topic.
-3. The IPNS is updated to reflect the root CID of the new signed Chat Group Storage.
+3. The IPNS is updated to reflect the root CID of the new signed Chat Group Storage. The key for signing this IPNS name is the same as the Common Key.
 
 The merging process upon receipt of new messages is described in the above section, as the entire
 root CIS is broadcast, making no difference in the process.

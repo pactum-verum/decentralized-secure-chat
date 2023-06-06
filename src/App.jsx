@@ -8,7 +8,7 @@ import Select from './components/Select';
 
 const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
-  const [groupCid, setGroupCid] = React.useState(null);
+  const [group, setGroup] = React.useState(null);
   const [ecdh, setEcdh] = React.useState(null);
   const [address, setAddress] = React.useState(null);
 
@@ -43,10 +43,10 @@ const App = ({ipfs}) => {
 
 console.log("ecdh", ecdh);
   return (<Box bg='black' w='100%' h='100%' p={4} color='white'>
-      <Titlebar setSigner={setSigner} groupName={groupName} groupCid={groupCid} setGroupCid={setGroupCid} setEcdh={setEcdh} />
+      <Titlebar setSigner={setSigner} groupName={groupName} group={group} setGroup={setGroup} setEcdh={setEcdh} />
       {ecdh?
-      (!groupCid?
-      <Select ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroupCid={setGroupCid} />
+      (!group?
+      <Select ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroup={setGroup} />
       :
       <Grid width='100%'>
           <GridItem rowStart={1} colSpan={1}  bg='black'>
