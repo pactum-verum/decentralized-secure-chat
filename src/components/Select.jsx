@@ -18,8 +18,10 @@ const Select = ({ ipfs, address, signer, ecdh, setGroupName, setGroupCid }) => {
       window.alert("Please enter your name!");
       return;
     }
-console.log("Creating group: ", groupNameEntry, myName)
-    setGroupCid(await createEmptyGroup(groupNameEntry, myName, ipfs, address, ecdh))
+console.log("Creating group: ", groupNameEntry, myName);
+    setGroupName(groupNameEntry);
+    setGroupCid(await createEmptyGroup(groupNameEntry, myName, ipfs, address, ecdh));
+    await requestGroup(); // In case there is a group with the same name already.
   }
 
   const createRequest = (name) => {
@@ -68,7 +70,7 @@ console.log("Sent to topic: ", topic, "message", msg);
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
             <FormLabel>Group Name</FormLabel>
             <Input placeholder='Group Name' onChange={event => setGroupNameEntry(event.target.value)} />
-            <Button onClick={() => requestGroup(groupNameEntry)} >Open</Button>
+            <Button onClick={requestGroup} >Open</Button>
         </Box>
         <Text>or</Text>
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
