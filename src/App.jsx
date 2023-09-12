@@ -8,7 +8,8 @@ import Select from './components/Select';
 
 const App = ({ipfs}) => {
   const [signer, setSigner] = React.useState(null);
-  const [group, setGroup] = React.useState(null);
+  const [groupCid, setGroupCid] = React.useState(null);
+  const [groupName, setGroupName] = React.useState(null);
   const [ecdh, setEcdh] = React.useState(null);
   const [address, setAddress] = React.useState(null);
 
@@ -18,9 +19,6 @@ const App = ({ipfs}) => {
       setAddress(await signer.getAddress());
     }) ();
   }, [signer]);
-
-  // Replace these with your actual data from the backend
-  const groupName = 'Our Group';
 
   const users = [
     { name: 'User1' },
@@ -43,17 +41,17 @@ const App = ({ipfs}) => {
 
 console.log("ecdh", ecdh);
   return (<Box bg='black' w='100%' h='100%' p={4} color='white'>
-      <Titlebar setSigner={setSigner} groupName={groupName} group={group} setGroup={setGroup} setEcdh={setEcdh} />
+      <Titlebar setSigner={setSigner} groupName={groupName} setGroupName={setGroupName} setGroupCid={setGroupCid} setEcdh={setEcdh} />
       {ecdh?
-      (!group?
-      <Select ipfs={ipfs} address={address} signer={signer} ecdh={ecdh} setGroup={setGroup} />
+      (!groupCid?
+      <Select address={address} signer={signer} ecdh={ecdh} setGroupName={setGroupName} setGroupCid={setGroupCid} />
       :
       <Grid width='100%'>
           <GridItem rowStart={1} colSpan={1}  bg='black'>
-              <Sidebar users={users} ipfs={ipfs} />
+              <Sidebar users={users} />
           </GridItem>
           <GridItem rowStart={1} colSpan={19}  bg='black'>
-              <ChatArea messages={messages} ipfs={ipfs} />
+              <ChatArea messages={messages} />
           </GridItem>
       </Grid>):''}
   </Box>);

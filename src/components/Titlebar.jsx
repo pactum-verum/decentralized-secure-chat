@@ -5,7 +5,7 @@ import { Flex, HStack, Button, Text, Box } from '@chakra-ui/react'
 import { CloseIcon } from '@chakra-ui/icons'
 import seedToEcdh from '../utils/seedToECDH';
 
-function Titlebar({setSigner, groupName, groupCid, setGroupCid, setEcdh}) {
+function Titlebar({setSigner, groupName, setGroupName, setGroupCid, setEcdh}) {
   const [address, setAddress] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -81,7 +81,7 @@ function Titlebar({setSigner, groupName, groupCid, setGroupCid, setEcdh}) {
         <Text fontWeight='bold'>Chat</Text>
         <Box display="flex" alignItems='center' >
             <Text>Group: {groupName}</Text>
-            {groupCid?<CloseIcon boxSize={3}  ml={2} color="red.500" onClick={() => setGroupCid(null)} cursor='pointer' />:''}
+            {groupName?<CloseIcon boxSize={3}  ml={2} color="red.500" onClick={() => { setGroupCid(null); setGroupName(null) } } cursor='pointer' />:''}
         </Box>
         <HStack>
             <Text>{address && <span>Address: {address}</span>}</Text>

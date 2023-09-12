@@ -9,12 +9,12 @@ import { ChakraProvider } from '@chakra-ui/react';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 try {
   // const ipfs = ipfs({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
-  const ipfs = await IPFS.create("http://localhost:5001");
+  window.ipfs = await IPFS.create("http://localhost:5001");
 
   root.render(
     <React.StrictMode>
       <ChakraProvider>
-        <App ipfs={ipfs} />
+        <App/>
       </ChakraProvider>
     </React.StrictMode>
   );

@@ -2,7 +2,6 @@
 import crypto from 'crypto';
 import { CID } from 'multiformats/cid';
 import emptyFolder from './emptyFolder';
-import publishToIpns from './publishToIpns';
 
 export default async function createEmptyGroup(groupName, myName, ipfs, address, ecdh) {
 console.log("Creating...")
@@ -32,7 +31,7 @@ console.log("encCK", encCommonKey)
         content: CID.parse(emptyFolder),
     }
 console.log("et", emptyGroup);
-    const cid = await ipfs.dag.put(emptyGroup);
+    const cid = await window.ipfs.dag.put(emptyGroup);
 console.log("cid", cid.toString())
 
     // Non need to sign - the creator trusts himself
@@ -40,10 +39,9 @@ console.log("cid", cid.toString())
     //     root: emptyTree,
     //     signature: await signer.signMessage(cid.toString())
     // }
-    // const scid = await ipfs.dag.put(signedTree);
+    // const scid = await window.ipfs.dag.put(signedTree);
 
     // No need to notify anyone, as there is only one user now
 
-    // Publish new cid to IPNS
-    return publishToIpns(cid.toString(), commonSecret, ipfs);
+    return cid.toString();
 }

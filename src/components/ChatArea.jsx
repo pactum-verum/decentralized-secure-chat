@@ -7,7 +7,7 @@ const ChatArea = ({ messages, ipfs }) => {
     <VStack align='left' p={2} >
         <br/>
         {messages.map((message, index) => (
-            <Message key={index} message={message} ipfs={ipfs} />
+            <Message key={index} message={message} />
         ))}
     </VStack>
   );

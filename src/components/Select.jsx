@@ -1,15 +1,25 @@
 import React from 'react';
 import { Box, Text, FormLabel, Input, Button, useClipboard } from '@chakra-ui/react'
 import createEmptyGroup from '../utils/createEmptyGroup';
+import groupNameToTopic from '../utils/groupNameToTopic';
 
-const Select = ({ ipfs, address, signer, ecdh, setGroup }) => {
-  const [groupName, setGroupName] = React.useState('');
+const Select = ({ ipfs, address, signer, ecdh, setGroupName, setGroupCid }) => {
+  const [groupNameEntry, setGroupNameEntry] = React.useState('');
+  const [groupCidEntry, setGroupCidEntry] = React.useState('');
   const [myName, setMyName] = React.useState('');
   const membershipRequest = useClipboard('');
 
   const createGroup = async () => {
-console.log("Creating group: ", groupName, myName)
-    setGroupName(await createEmptyGroup(groupName, myName, ipfs, address, ecdh))
+    if (!groupNameEntry) {
+      window.alert("Please enter a group name!");
+      return;
+    }
+    if (!myName) {
+      window.alert("Please enter your name!");
+      return;
+    }
+console.log("Creating group: ", groupNameEntry, myName)
+    setGroupCid(await createEmptyGroup(groupNameEntry, myName, ipfs, address, ecdh))
   }
 
   const createRequest = (name) => {
@@ -23,18 +33,47 @@ console.log("Creating group: ", groupName, myName)
     createRequest(myName);
   }, [myName, createRequest]);
 
+  const updateHandler = async (msg) => {
+    const strMsg = String.fromCharCode(...msg.data);
+  console.log("groupNameEntry: ", groupNameEntry);
+  console.log("MESSAGE: ", strMsg);
+    const m = JSON.parse(strMsg);
+    if (m.instruction !== 'update') return;
+    await window.ipfs.pubsub.unsubscribe(groupNameToTopic(groupNameEntry), updateHandler);
+    setGroupCid(m.cid);
+    setGroupName(m.groupName);
+  }
+
+  const requestGroup = async () => {
+    if (!groupNameEntry) {
+      window.alert("Please enter a group name!");
+      return;
+    }
+    const topic = groupNameToTopic(groupNameEntry);
+    await window.ipfs.pubsub.subscribe(topic, updateHandler);
+    const msg = JSON.stringify({instruction: 'broadcast', groupName: groupNameEntry});                 
+    await window.ipfs.pubsub.publish(topic, msg);
+console.log("Sent to topic: ", topic, "message", msg);
+  }
+
   if (!address) return <></>;
   return (
     <Box width='80%' align='center' p={2} >
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
-            <FormLabel>Group Name</FormLabel>
-            <Input placeholder='CID' onChange={event => setGroupName(event.target.value)} />
-            <Button onClick={() => setGroup(groupName)} >Open</Button>
+            <FormLabel>Group CID</FormLabel>
+            <Input placeholder='CID' onChange={event => setGroupCidEntry(event.target.value)} />
+            <Button onClick={() => setGroupCid(groupCidEntry)} >Open</Button>
         </Box>
         <Text>or</Text>
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
             <FormLabel>Group Name</FormLabel>
-            <Input placeholder='Group Name' onChange={event => setGroupName(event.target.value)} />
+            <Input placeholder='Group Name' onChange={event => setGroupNameEntry(event.target.value)} />
+            <Button onClick={() => requestGroup(groupNameEntry)} >Open</Button>
+        </Box>
+        <Text>or</Text>
+        <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
+            <FormLabel>Group Name</FormLabel>
+            <Input placeholder='Group Name' onChange={event => setGroupNameEntry(event.target.value)} />
             <FormLabel>My Name</FormLabel>
             <Input placeholder='My Name' onChange={event => setMyName(event.target.value)}  value={myName} />
             <Button onClick={createGroup} >Create</Button>

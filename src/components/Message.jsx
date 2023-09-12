@@ -8,7 +8,7 @@ const Message = ({ message, ipfs }) => {
       <Text>{message.user}:</Text>
       <Text>{message.text}</Text>
       {message.attachments.map((attachment, index) => (
-        <Attachment key={index} attachment={attachment} ipfs={ipfs} />
+        <Attachment key={index} attachment={attachment} />
       ))}
     </Box>
   );

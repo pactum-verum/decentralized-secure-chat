@@ -16,7 +16,7 @@ const Attachment = ({ attachment, ipfs }) => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const file = await ipfs.get(attachment.ipfsHash);
+        const file = await window.ipfs.get(attachment.ipfsHash);
         const content = await file[0].content.toString();
         setContent(content);
       } catch (error) {
