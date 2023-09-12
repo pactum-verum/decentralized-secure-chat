@@ -2,9 +2,13 @@ import React from 'react';
 import { Box, Grid, GridItem } from '@chakra-ui/react'
 import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
+import NewMessage from './NewMessage';
 import groupNameToTopic from '../utils/groupNameToTopic';
 
 const Group = (address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid) => {
+    const [messages, setMessages] = React.useState([]);
+    const [users, setUsers] = React.useState([]);
+
     const updateHandler = async (msg) => {
         const strMsg = String.fromCharCode(...msg.data);
         console.log("groupName: ", groupName);
@@ -12,13 +16,20 @@ const Group = (address, signer, ecdh, groupName, setGroupName, groupCid, setGrou
         const m = JSON.parse(strMsg);
         if (m.instruction === 'broadcast') {
 console.log("Received broadcast message: ", m);
+            if (m.groupName !== groupName) return;
+            const topic = groupNameToTopic(groupName);
+            const msg = JSON.stringify({instruction: 'update', groupName: groupName, cid: groupCid});
+            await window.ipfs.pubsub.publish(topic, msg);
         } else if (m.instruction === 'update') {
 console.log("Received update message: ", m);
-        } else if (m.instruction === 'addUser') {
-console.log("Received addUser message: ", m);
+            if (m.groupName !== groupName) return;
+            if (m.cid === groupCid) return; // No update
+            // Merge the new group with the old one.
+            // Check signer membership.
+            // Merge users.
+            // Merge messages.
         }
     }
-
 
     React.useEffect(() => {
         if (!groupName) return;
@@ -34,24 +45,26 @@ console.log("(Re)subscribing groupName: ", groupName);
         }
     }, [address, signer, ecdh, groupName]);
 
-    const users = [
-        { name: 'User1' },
-        { name: 'User2' },
-        { name: 'User3' },
-    ];
+    React.useEffect(() => {
+        setUsers([
+            { name: 'User1' },
+            { name: 'User2' },
+            { name: 'User3' },
+        ]);
 
-    const messages = [
-        {
-            user: 'User1',
-            text: 'Hello, everyone!',
-            attachments: [{ name: 'image.jpg' }],
-        },
-        {
-            user: 'User2',
-            text: 'Hi, User1!',
-            attachments: [],
-        },
-    ];
+        setMessages([
+            {
+                user: 'User1',
+                text: 'Hello, everyone!',
+                attachments: [{ name: 'image.jpg' }],
+            },
+            {
+                user: 'User2',
+                text: 'Hi, User1!',
+                attachments: [],
+            },
+        ]);
+    }, []);
 
     console.log("ecdh", ecdh);
     console.log("groupCid", groupCid);
@@ -61,6 +74,7 @@ console.log("(Re)subscribing groupName: ", groupName);
         </GridItem>
         <GridItem rowStart={1} colSpan={19} bg='black'>
             <ChatArea messages={messages} />
+            <NewMessage messages={messages} setMessages={setMessages}/>
         </GridItem>
     </Grid>);
 };

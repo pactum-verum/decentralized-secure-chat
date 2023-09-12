@@ -8,7 +8,7 @@ import 'prismjs/themes/prism.css';
 import { parse as marked } from 'marked';
 import ipfsClient from 'ipfs-http-client';
 
-const Attachment = ({ attachment, ipfs }) => {
+const Attachment = ({ attachment }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [content, setContent] = useState(null);

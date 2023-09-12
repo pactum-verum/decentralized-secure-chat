@@ -2,7 +2,7 @@ import React from 'react';
 import Message from './Message';
 import { VStack } from '@chakra-ui/react'
 
-const ChatArea = ({ messages, ipfs }) => {
+const ChatArea = ({ messages }) => {
   return (
     <VStack align='left' p={2} >
         <br/>

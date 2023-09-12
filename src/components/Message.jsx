@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Text } from '@chakra-ui/react'
 import Attachment from './Attachment';
 
-const Message = ({ message, ipfs }) => {
+const Message = ({ message }) => {
   return (
     <Box bg='gray.700' borderRadius='md' shadow='lg'>
       <Text>{message.user}:</Text>
