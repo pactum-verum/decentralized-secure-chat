@@ -28,7 +28,7 @@ console.log("encCK", encCommonKey)
     const emptyGroup = {
         name: groupName,
         users: users, 
-        content: CID.parse(emptyFolder),
+        messages: [],
     }
 console.log("et", emptyGroup);
     const cid = await window.ipfs.dag.put(emptyGroup);

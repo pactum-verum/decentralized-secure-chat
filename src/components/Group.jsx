@@ -4,8 +4,10 @@ import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 import NewMessage from './NewMessage';
 import groupNameToTopic from '../utils/groupNameToTopic';
+import { CID } from 'multiformats/cid';
 
-const Group = (address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid) => {
+
+const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid}) => {
     const [messages, setMessages] = React.useState([]);
     const [users, setUsers] = React.useState([]);
 
@@ -34,37 +36,65 @@ console.log("Received update message: ", m);
     React.useEffect(() => {
         if (!groupName) return;
         const topic = groupNameToTopic(groupName);
-console.log("(Re)subscribing groupName: ", groupName);
+console.log("(Re)subscribing groupName: ", groupName, "topic: ", topic);
         (async () => {
-            await window.ipfs.pubsub.subscribe(topic, updateHandler);
+            try {
+                //await window.ipfs.pubsub.unsubscribe(topic, updateHandler);
+                await window.ipfs.pubsub.unsubscribe(topic);
+            } catch (error) {
+                console.log("Error unsubscribing: ", error);
+            }
+            try {
+                await window.ipfs.pubsub.subscribe(topic, updateHandler);
+            } catch (error) {
+                console.log("Error subscribing: ", error);
+            }    
+console.log("Subscribed to topic: ", topic);
         })();
         return () => {
             (async () => {
-                await window.ipfs.pubsub.unsubscribe(topic, updateHandler);
+                try {
+                    //await window.ipfs.pubsub.unsubscribe(topic, updateHandler);
+                    await window.ipfs.pubsub.unsubscribe(topic);
+                } catch (error) {
+                    console.log("Error unsubscribing: ", error);
+                }
             })();
         }
     }, [address, signer, ecdh, groupName]);
 
     React.useEffect(() => {
-        setUsers([
-            { name: 'User1' },
-            { name: 'User2' },
-            { name: 'User3' },
-        ]);
+console.log("groupCid changed: ", groupCid);
+        if (!groupCid) return;
+        (async () => {
+            const group = await window.ipfs.dag.get(CID.parse(groupCid));
+            setGroupName(group.value.name);
+            setUsers(group.value.users);
+            setMessages(group.value.messages);
+console.log("Loaded group", group);
+        })();
+    }, [groupCid]);
 
-        setMessages([
-            {
-                user: 'User1',
-                text: 'Hello, everyone!',
-                attachments: [{ name: 'image.jpg' }],
-            },
-            {
-                user: 'User2',
-                text: 'Hi, User1!',
-                attachments: [],
-            },
-        ]);
-    }, []);
+    // React.useEffect(() => {
+    //     setUsers([
+    //         { name: 'User1' },
+    //         { name: 'User2' },
+    //         { name: 'User3' },
+    //     ]);
+
+    //     setMessages([
+    //         {
+    //             user: 'User1',
+    //             text: 'Hello, everyone!',
+    //             attachments: [{ name: 'image.jpg' }],
+    //         },
+    //         {
+    //             user: 'User2',
+    //             text: 'Hi, User1!',
+    //             attachments: [],
+    //         },
+    //     ]);
+    // }, []);
 
     console.log("ecdh", ecdh);
     console.log("groupCid", groupCid);
