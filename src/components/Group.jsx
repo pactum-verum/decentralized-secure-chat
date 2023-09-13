@@ -12,27 +12,41 @@ import { type } from 'os';
 
 const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid}) => {
     const [messages, setMessages] = React.useState([]);
+    const messagesRef = React.useRef(messages);
+    React.useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
+
     const [users, setUsers] = React.useState({});
+    const usersRef = React.useRef(users);
+    React.useEffect(() => {
+        usersRef.current = users;
+    }, [users]);
+
+    const groupCidRef = React.useRef(groupCid);
+    React.useEffect(() => {
+        groupCidRef.current = groupCid;
+    }, [groupCid]);
 
     const updateHandler = async (msg) => {
-console.log("Update handler called. Users: ", users);
+console.log("Update handler called. Users: ", users, "usersRef.current: ", usersRef.current);
         const strMsg = String.fromCharCode(...msg.data);
-        console.log("groupName: ", groupName);
+        console.log("groupName: ", groupName); // No groupName reference needed - it does not change since this closure is created.
         console.log("Message:", strMsg);
         const m = JSON.parse(strMsg);
         if (m.instruction === 'broadcast') {
 console.log("Received broadcast message: ", m);
             if (m.groupName !== groupName) return;
             const topic = groupNameToTopic(groupName);
-            const msg = JSON.stringify({instruction: 'update', groupName: groupName, cid: groupCid});
+            const msg = JSON.stringify({instruction: 'update', groupName: groupName, cid: groupCidRef.current});
             await window.ipfs.pubsub.publish(topic, msg);
         } else if (m.instruction === 'update') {
 console.log("Received update message: ", m);
             if (m.groupName !== groupName) return;
-console.log("m.cid: ", m.cid, "groupCid: ", groupCid, typeof m.cid, typeof groupCid, m.cid === groupCid);
-            if (m.cid === groupCid) return; // No update
+console.log("m.cid: ", m.cid, "groupCidRef.current: ", groupCidRef.current);
+            if (m.cid === groupCidRef.current) return; // No update
             // Merge the new group with the old one.
-            if (groupCid === null) {
+            if (groupCidRef.current === null) {
                 setGroupCid(m.cid); // This will trigger a re-render.
                 return;
             }
@@ -40,17 +54,17 @@ console.log("m.cid: ", m.cid, "groupCid: ", groupCid, typeof m.cid, typeof group
 console.log("******** newGroup: ", newGroup);
             // Check signer membership.
             // Merge users.
-            const mergedUsers = {...users, ...newGroup.value.users};
+            const mergedUsers = {...usersRef.current, ...newGroup.value.users};
             //setUsers(mergedUsers);
             // Merge messages.
             let commonLength = 0;
             // Find the length of the common initial sequence
-            while (commonLength < messages.length && commonLength < newGroup.value.messages.length && messages[commonLength] === newGroup.value.messages[commonLength]) 
+            while (commonLength < messagesRef.current.length && commonLength < newGroup.value.messages.length && messagesRef.current[commonLength] === newGroup.value.messages[commonLength]) 
                 commonLength++;
             // Merge based on the described rules
             const mergedMessages = [
-                ...messages.slice(0, commonLength),  // Common initial sequence
-                ...messages.slice(commonLength),    // Rest of the first array
+                ...messagesRef.current.slice(0, commonLength),  // Common initial sequence
+                ...messagesRef.current.slice(commonLength),    // Rest of the first array
                 ...newGroup.value.messages.slice(commonLength)     // Rest of the second array
             ];
             //setMessages(mergedMessages); // !!! Improve this to avoid duplicates.
@@ -60,23 +74,23 @@ console.log("Merged messages", {name: groupName, users: mergedUsers, messages: m
             const strCidMerged = cidMerged.toString(); 
             setGroupCid(strCidMerged); // This will trigger a re-render.
         } else if (m.instruction === 'join') {
-console.log("users: ", users);
+console.log("usersRef.current: ", usersRef.current);
             if (m.groupName !== groupName) return;
-            if (users[m.address] !== undefined) return; // Already a member.
+            if (usersRef.current[m.address] !== undefined) return; // Already a member.
             if (! window.confirm(`${m.alias} wants to join the group. Do you approve?`)) return;
             // Recover encryption common key.
-console.log("users[address]: ", users[m.address]);
-            const commonKey = getCommonKey(users[address].key.peer_pubkey, users[address].key.enc_common_key, ecdh);
+console.log("usersRef.current[address]: ", usersRef.current[m.address]);
+            const commonKey = getCommonKey(usersRef.current[address].key.peer_pubkey, usersRef.current[address].key.enc_common_key, ecdh);
             const newUser = addUser(m.alias, m.pubkey, commonKey, ecdh);
             // Add user.
-            const newUsers = {...users, [m.address]: newUser};
+            const newUsers = {...usersRef.current, [m.address]: newUser};
 console.log("newUsers: ", newUsers);
             setUsers(newUsers);
             // Add message.
             //const newMessages = [...messages, {user: 'System', text: `${m.alias} joined the group.`, attachments: []}];
             //setMessages(newMessages);
             // Save group to IPFS.
-            const cid = await window.ipfs.dag.put({name: groupName, users: newUsers, messages: messages});
+            const cid = await window.ipfs.dag.put({name: groupName, users: newUsers, messages: messagesRef.current});
             const cidString = cid.toString();
             setGroupCid(cidString);
         }

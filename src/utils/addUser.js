@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 and MIT
 import crypto from 'crypto';
 
-export default async function addUser(alias, pubkey, commonSecret, ecdh) {
+export default function addUser(alias, pubkey, commonSecret, ecdh) {
     try {
         // Derive Shared Key-encryption Secret from request Public Key and my ECDH Private Key
         const keyEncryprionKey = ecdh.computeSecret(Buffer.from(pubkey, 'hex'));
