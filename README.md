@@ -2,6 +2,10 @@
 
 Libp2p style messaging, but for multiple parties chatting, group management in IPFS-defined groups, encryption and signing of messages.
 
+## Demo
+
+The demo can be found [here](./demo/README.md).
+
 ## Requirements
 
 - The users need to exchange messages in a publish-subscribe manner. Each message can be any content
