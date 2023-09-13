@@ -8,7 +8,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 try {
-  // const ipfs = ipfs({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
+  // window.ipfs = ipfs({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
   window.ipfs = await IPFS.create("http://localhost:5001");
 
   root.render(

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { CID } from 'multiformats/cid';
 import emptyFolder from './emptyFolder';
 
-export default async function createEmptyGroup(groupName, myName, ipfs, address, ecdh) {
+export default async function createEmptyGroup(groupName, myName, address, ecdh) {
 console.log("Creating...")
     // Create dummy ECDH
     const dummyECDH = crypto.createECDH('secp256k1');
@@ -30,7 +30,7 @@ console.log("encCK", encCommonKey)
         users: users, 
         messages: [],
     }
-console.log("et", emptyGroup);
+console.log("***** empty group: ", emptyGroup);
     const cid = await window.ipfs.dag.put(emptyGroup);
 console.log("cid", cid.toString())
 

@@ -3,12 +3,10 @@ import { Box, Text, FormLabel, Input, Button, useClipboard } from '@chakra-ui/re
 import createEmptyGroup from '../utils/createEmptyGroup';
 import groupNameToTopic from '../utils/groupNameToTopic';
 
-const Select = ({ ipfs, address, signer, ecdh, setGroupName, setGroupCid }) => {
+const Select = ({ address, signer, ecdh, setGroupName, setGroupCid }) => {
   const [groupNameEntry, setGroupNameEntry] = React.useState('');
-  const [groupCidEntry, setGroupCidEntry] = React.useState('');
   const [myName, setMyName] = React.useState('');
-  const membershipRequest = useClipboard('');
-
+  
   const createGroup = async () => {
     if (!groupNameEntry) {
       window.alert("Please enter a group name!");
@@ -20,20 +18,20 @@ const Select = ({ ipfs, address, signer, ecdh, setGroupName, setGroupCid }) => {
     }
 console.log("Creating group: ", groupNameEntry, myName);
     setGroupName(groupNameEntry);
-    setGroupCid(await createEmptyGroup(groupNameEntry, myName, ipfs, address, ecdh));
-    await requestGroup(); // In case there is a group with the same name already.
+    setGroupCid(await createEmptyGroup(groupNameEntry, myName, address, ecdh));
   }
 
-  const createRequest = (name) => {
-    if (!ecdh) return;
-    setMyName(name); 
-    const request = { alias: name, address: address, pubkey: ecdh.getPublicKey().toString('hex')};
-    membershipRequest.setValue(JSON.stringify(request));
+  const joinGroup = async (name) => {
+    if (!ecdh) {
+      window.alert("Please connect your wallet and sign key generation!");
+      return;
+    }
+    const msg = JSON.stringify({instruction: 'join', groupName: groupNameEntry, alias: name, address: address, pubkey: ecdh.getPublicKey().toString('hex')})
+    await window.ipfs.pubsub.publish(groupNameToTopic(groupNameEntry), msg);
+      // setGroupName(groupNameEntry);
+      // setGroupCid(await createEmptyGroup(groupNameEntry, myName, address, ecdh)); // Will be rejected if group already exists and not already a member.
+      await openGroup();
   }
-
-  React.useEffect(() => {
-    createRequest(myName);
-  }, [myName, createRequest]);
 
   const updateHandler = async (msg) => {
     const strMsg = String.fromCharCode(...msg.data);
@@ -46,7 +44,7 @@ console.log("Creating group: ", groupNameEntry, myName);
     setGroupName(m.groupName);
   }
 
-  const requestGroup = async () => {
+  const openGroup = async () => {
     if (!groupNameEntry) {
       window.alert("Please enter a group name!");
       return;
@@ -62,15 +60,10 @@ console.log("Sent to topic: ", topic, "message", msg);
   return (
     <Box width='80%' align='center' p={2} >
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
-            <FormLabel>Group CID</FormLabel>
-            <Input placeholder='CID' onChange={event => setGroupCidEntry(event.target.value)} />
-            <Button onClick={() => setGroupCid(groupCidEntry)} >Open</Button>
-        </Box>
-        <Text>or</Text>
-        <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
             <FormLabel>Group Name</FormLabel>
             <Input placeholder='Group Name' onChange={event => setGroupNameEntry(event.target.value)} />
-            <Button onClick={requestGroup} >Open</Button>
+            <br/><br/>
+            <Button onClick={openGroup} >Open</Button>
         </Box>
         <Text>or</Text>
         <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
@@ -78,15 +71,9 @@ console.log("Sent to topic: ", topic, "message", msg);
             <Input placeholder='Group Name' onChange={event => setGroupNameEntry(event.target.value)} />
             <FormLabel>My Name</FormLabel>
             <Input placeholder='My Name' onChange={event => setMyName(event.target.value)}  value={myName} />
-            <Button onClick={createGroup} >Create</Button>
-        </Box>
-        <Text>or</Text>
-        <Box bg='gray.700' width='30%' justify='space-between' borderRadius='md' shadow='lg' align='center' p={2}>
-            <FormLabel>My Name</FormLabel>
-            <Input placeholder='My Name' onChange={event => {createRequest(event.target.value)}} value={myName} />
-            <FormLabel>Request</FormLabel>
-            <Input placeholder='Request' isDisabled={true} value={membershipRequest.value} />
-            <Button onClick={membershipRequest.onCopy} disabled={!membershipRequest.value} >{membershipRequest.hasCopied ? "Copied!" : "Copy"}</Button>
+            <br/><br/>
+            <Button onClick={createGroup} >Create</Button> &nbsp;
+            <Button onClick={joinGroup} >Join</Button>
         </Box>
     </Box>
   );

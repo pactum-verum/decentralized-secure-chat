@@ -16,6 +16,7 @@ export default async function addUser(request, root, commonSecret, ecdh) {
             key: { peer_pubkey: ecdh.getPublicKey().toString('hex'), enc_common_key: encCommonKey.toString('hex') }
         }
 
+console.log("***** new user: ", r)
         const cid = await window.ipfs.dag.put(r);
 
         // No pinning planned, but this is the place to pin the rootCid
