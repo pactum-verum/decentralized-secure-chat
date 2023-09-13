@@ -6,7 +6,6 @@ const NewMessage = ({ user, messages, setMessages }) => {
     const [message, setMessage] = React.useState("");
 
     const sendMessage = async () => {
-console.log("messages", messages);
         const newMessages = [...messages];
         newMessages.push({ user: user, text: message, attachments: [] });
         setMessages(newMessages);

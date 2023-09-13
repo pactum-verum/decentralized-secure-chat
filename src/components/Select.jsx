@@ -16,7 +16,6 @@ const Select = ({ address, signer, ecdh, setGroupName, setGroupCid }) => {
       window.alert("Please enter your name!");
       return;
     }
-console.log("Creating group: ", groupNameEntry, myName);
     setGroupName(groupNameEntry);
     setGroupCid(await createEmptyGroup(groupNameEntry, myName, address, ecdh));
   }
@@ -36,8 +35,6 @@ console.log("Creating group: ", groupNameEntry, myName);
 
   const updateHandler = async (msg) => {
     const strMsg = String.fromCharCode(...msg.data);
-  console.log("groupNameEntry: ", groupNameEntry);
-  console.log("MESSAGE: ", strMsg);
     const m = JSON.parse(strMsg);
     if (m.instruction !== 'update') return;
     await window.ipfs.pubsub.unsubscribe(groupNameToTopic(groupNameEntry), updateHandler);
@@ -54,7 +51,6 @@ console.log("Creating group: ", groupNameEntry, myName);
     await window.ipfs.pubsub.subscribe(topic, updateHandler);
     const msg = JSON.stringify({instruction: 'broadcast', groupName: groupNameEntry});                 
     await window.ipfs.pubsub.publish(topic, msg);
-console.log("Sent to topic: ", topic, "message", msg);
   }
 
   if (!address) return <></>;

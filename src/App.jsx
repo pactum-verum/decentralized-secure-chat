@@ -19,8 +19,6 @@ const App = () => {
     }) ();
   }, [signer]);
 
-console.log("ecdh", ecdh);
-console.log("groupCid", groupCid);
   return (<Box bg='black' w='100%' h='100%' p={4} color='white'>
       <Titlebar setSigner={setSigner} groupName={groupName} setGroupName={setGroupName} setGroupCid={setGroupCid} setEcdh={setEcdh} />
       {ecdh?
