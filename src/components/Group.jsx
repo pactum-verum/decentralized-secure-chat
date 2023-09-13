@@ -8,7 +8,8 @@ import getCommonKey from '../utils/getCommonKey';
 import addUser from '../utils/addUser';
 import { CID } from 'multiformats/cid';
 import { type } from 'os';
-
+import encryptBuffer from '../utils/encryptBuffer';
+import decryptBuffer from '../utils/decryptBuffer';
 
 const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid}) => {
     const [messages, setMessages] = React.useState([]);
@@ -27,6 +28,39 @@ const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGro
     React.useEffect(() => {
         groupCidRef.current = groupCid;
     }, [groupCid]);
+
+    const [commonKey, setCommonKey] = React.useState(null);
+    // Calculate common key.
+    React.useEffect(() => {
+        if (!ecdh) return;
+        if (!users) return;
+        if (!users[address]) return;
+        if (!users[address].key) return;
+        if (!users[address].key.peer_pubkey) return;
+        if (!users[address].key.enc_common_key) return;
+        const ck = getCommonKey(users[address].key.peer_pubkey, users[address].key.enc_common_key, ecdh);
+        setCommonKey(ck);
+console.log("Common key: ", ck);
+
+        // Test common key.
+        try {
+            const testString = 'This is a test message.';
+            const cleartextBuffer = Buffer.from(testString, 'utf-8');
+            const ciphertextBuffer = encryptBuffer(cleartextBuffer, ck);
+            console.log("Test cleartext: ", cleartextBuffer);
+            console.log("Test ciphertext: ", ciphertextBuffer);
+            console.log("Test ciphertext string: ", ciphertextBuffer.toString('hex'));
+            const decryptedBuffer = decryptBuffer(ciphertextBuffer, ck);
+            const decryptedString = decryptedBuffer.toString('utf-8');
+            console.log("Test string match test: ", testString, decryptedString, testString === decryptedString); 
+        } catch (error) {
+            console.log("Error testing common key: ", error);
+        }
+    }, [ecdh, users, address]);
+    const commonKeyRef = React.useRef(commonKey);
+    React.useEffect(() => {
+        commonKeyRef.current = commonKey;
+    }, [commonKey]);
 
     const updateHandler = async (msg) => {
         const strMsg = String.fromCharCode(...msg.data);
@@ -145,27 +179,6 @@ console.log("Merged messages", {name: groupName, users: mergedUsers, messages: m
             await window.ipfs.pubsub.publish(groupNameToTopic(groupName), JSON.stringify({instruction: 'update', groupName: groupName, cid: cidString}));
         })();
     }, [messages]);
-
-    // React.useEffect(() => {
-    //     setUsers([
-    //         { name: 'User1' },
-    //         { name: 'User2' },
-    //         { name: 'User3' },
-    //     ]);
-
-    //     setMessages([
-    //         {
-    //             user: 'User1',
-    //             text: 'Hello, everyone!',
-    //             attachments: [{ name: 'image.jpg' }],
-    //         },
-    //         {
-    //             user: 'User2',
-    //             text: 'Hi, User1!',
-    //             attachments: [],
-    //         },
-    //     ]);
-    // }, []);
 
     if (users[address] === undefined) return (<></>);
     return (<Grid width='100%'>

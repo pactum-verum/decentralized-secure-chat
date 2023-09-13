@@ -5,5 +5,5 @@ import { concat } from 'uint8arrays/concat';
 export default function decryptBuffer(buffer, commonKey) {
     const cipher = 'aes-256-ctr';
     const decrypter = crypto.createDecipher(cipher, Buffer.from(commonKey, 'hex'));
-    return Buffer.concat([decrypter.update(Buffer.from(concat(buffer), 'hex')), decrypter.final()]);
+    return Buffer.concat([decrypter.update(Buffer.from(buffer, 'hex')), decrypter.final()]);
 }
