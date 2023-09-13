@@ -1,4 +1,10 @@
-# Presentation and Demo Video - see [this link](Decentralized%20Secure%20Chat%20-%20HD%20720p.mov).
+# Presentation and Demo Video
+
+Download from [this link](Decentralized%20Secure%20Chat%20-%20HD%20720p.mov).
+
+Or view on YouTube [here](https://youtu.be/7tlaApydUp0).
+
+# Setup
 
 To make sure there is no CORS issue, configure the IPFS node as follows, and restart it for the changes to take effect:
 ```
