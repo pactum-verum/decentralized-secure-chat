@@ -8,8 +8,8 @@ import getCommonKey from '../utils/getCommonKey';
 import addUser from '../utils/addUser';
 import { CID } from 'multiformats/cid';
 import { type } from 'os';
-import encryptBuffer from '../utils/encryptBuffer';
-import decryptBuffer from '../utils/decryptBuffer';
+// import encryptBuffer from '../utils/encryptBuffer';
+// import decryptBuffer from '../utils/decryptBuffer';
 
 const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGroupCid}) => {
     const [messages, setMessages] = React.useState([]);
@@ -40,27 +40,23 @@ const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGro
         if (!users[address].key.enc_common_key) return;
         const ck = getCommonKey(users[address].key.peer_pubkey, users[address].key.enc_common_key, ecdh);
         setCommonKey(ck);
-console.log("Common key: ", ck);
+console.log("Common key: ", ck); // !!! Remove this. It's just for testing. It reveals the common key to the console.
 
-        // Test common key.
-        try {
-            const testString = 'This is a test message.';
-            const cleartextBuffer = Buffer.from(testString, 'utf-8');
-            const ciphertextBuffer = encryptBuffer(cleartextBuffer, ck);
-            console.log("Test cleartext: ", cleartextBuffer);
-            console.log("Test ciphertext: ", ciphertextBuffer);
-            console.log("Test ciphertext string: ", ciphertextBuffer.toString('hex'));
-            const decryptedBuffer = decryptBuffer(ciphertextBuffer, ck);
-            const decryptedString = decryptedBuffer.toString('utf-8');
-            console.log("Test string match test: ", testString, decryptedString, testString === decryptedString); 
-        } catch (error) {
-            console.log("Error testing common key: ", error);
-        }
+        // // Test common key.
+        // try {
+        //     const testString = 'This is a test message.';
+        //     const cleartextBuffer = Buffer.from(testString, 'utf-8');
+        //     const ciphertextBuffer = encryptBuffer(cleartextBuffer, ck);
+        //     console.log("Test cleartext: ", cleartextBuffer);
+        //     console.log("Test ciphertext: ", ciphertextBuffer);
+        //     console.log("Test ciphertext string: ", ciphertextBuffer.toString('hex'));
+        //     const decryptedBuffer = decryptBuffer(ciphertextBuffer, ck);
+        //     const decryptedString = decryptedBuffer.toString('utf-8');
+        //     console.log("Test string match test: ", testString, decryptedString, testString === decryptedString); 
+        // } catch (error) {
+        //     console.log("Error testing common key: ", error);
+        // }
     }, [ecdh, users, address]);
-    const commonKeyRef = React.useRef(commonKey);
-    React.useEffect(() => {
-        commonKeyRef.current = commonKey;
-    }, [commonKey]);
 
     const updateHandler = async (msg) => {
         const strMsg = String.fromCharCode(...msg.data);
@@ -186,8 +182,8 @@ console.log("Merged messages", {name: groupName, users: mergedUsers, messages: m
             <Sidebar users={users} />
         </GridItem>
         <GridItem rowStart={1} colSpan={19} bg='black'>
-            <ChatArea messages={messages} />
-            <NewMessage user={users[address].alias} messages={messages} setMessages={setMessages}/>
+            <ChatArea messages={messages} commonKey={commonKey} />
+            <NewMessage user={users[address].alias} messages={messages} setMessages={setMessages} commonKey={commonKey} />
         </GridItem>
     </Grid>);
 };
