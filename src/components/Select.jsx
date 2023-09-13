@@ -21,16 +21,17 @@ console.log("Creating group: ", groupNameEntry, myName);
     setGroupCid(await createEmptyGroup(groupNameEntry, myName, address, ecdh));
   }
 
-  const joinGroup = async (name) => {
+  const joinGroup = async () => {
     if (!ecdh) {
       window.alert("Please connect your wallet and sign key generation!");
       return;
     }
-    const msg = JSON.stringify({instruction: 'join', groupName: groupNameEntry, alias: name, address: address, pubkey: ecdh.getPublicKey().toString('hex')})
+    const msg = JSON.stringify({instruction: 'join', groupName: groupNameEntry, alias: myName, address: address, pubkey: ecdh.getPublicKey().toString('hex')})
     await window.ipfs.pubsub.publish(groupNameToTopic(groupNameEntry), msg);
+    window.alert("Request sent to join group!");
       // setGroupName(groupNameEntry);
       // setGroupCid(await createEmptyGroup(groupNameEntry, myName, address, ecdh)); // Will be rejected if group already exists and not already a member.
-      await openGroup();
+      //await openGroup();
   }
 
   const updateHandler = async (msg) => {

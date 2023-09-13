@@ -4,6 +4,8 @@ import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 import NewMessage from './NewMessage';
 import groupNameToTopic from '../utils/groupNameToTopic';
+import getCommonKey from '../utils/getCommonKey';
+import addUser from '../utils/addUser';
 import { CID } from 'multiformats/cid';
 import { type } from 'os';
 
@@ -13,6 +15,7 @@ const Group = ({address, signer, ecdh, groupName, setGroupName, groupCid, setGro
     const [users, setUsers] = React.useState({});
 
     const updateHandler = async (msg) => {
+console.log("Update handler called. Users: ", users);
         const strMsg = String.fromCharCode(...msg.data);
         console.log("groupName: ", groupName);
         console.log("Message:", strMsg);
@@ -56,6 +59,26 @@ console.log("Merged messages", {name: groupName, users: mergedUsers, messages: m
             const cidMerged = await window.ipfs.dag.put({name: groupName, users: mergedUsers, messages: mergedMessages});
             const strCidMerged = cidMerged.toString(); 
             setGroupCid(strCidMerged); // This will trigger a re-render.
+        } else if (m.instruction === 'join') {
+console.log("users: ", users);
+            if (m.groupName !== groupName) return;
+            if (users[m.address] !== undefined) return; // Already a member.
+            if (! window.confirm(`${m.alias} wants to join the group. Do you approve?`)) return;
+            // Recover encryption common key.
+console.log("users[address]: ", users[m.address]);
+            const commonKey = getCommonKey(users[address].key.peer_pubkey, users[address].key.enc_common_key, ecdh);
+            const newUser = addUser(m.alias, m.pubkey, commonKey, ecdh);
+            // Add user.
+            const newUsers = {...users, [m.address]: newUser};
+console.log("newUsers: ", newUsers);
+            setUsers(newUsers);
+            // Add message.
+            //const newMessages = [...messages, {user: 'System', text: `${m.alias} joined the group.`, attachments: []}];
+            //setMessages(newMessages);
+            // Save group to IPFS.
+            const cid = await window.ipfs.dag.put({name: groupName, users: newUsers, messages: messages});
+            const cidString = cid.toString();
+            setGroupCid(cidString);
         }
     }
 
@@ -143,6 +166,7 @@ console.log("Users: ", users, typeof users);
     //     ]);
     // }, []);
 
+console.log("(render) users: ", users);
     if (users[address] === undefined) return (<></>);
     return (<Grid width='100%'>
         <GridItem rowStart={1} colSpan={1} bg='black'>
